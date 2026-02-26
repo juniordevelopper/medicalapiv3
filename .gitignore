@@ -1,0 +1,33 @@
+# Python kesh fayllari
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual muhit (Virtual Environment)
+venv/
+env/
+.env/
+ENV/
+
+# Maxfiy sozlamalar (Secret keys & Database credentials)
+.env
+local_settings.py
+
+# Ma'lumotlar bazasi
+db.sqlite3
+*.db
+
+# Media va Static fayllar (Serverga yuklangan rasmlar va h.k.)
+media/
+staticfiles/
+
+# IDE sozlamalari
+.vscode/
+.idea/
+*.swp
+
+# DRF/Django loglari
+*.log
+
+# Boshqa tizim fayllari
+.DS_Store
