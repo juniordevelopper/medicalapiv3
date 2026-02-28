@@ -48,6 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     address = models.TextField(blank=True, null=True)
+    blood_group = models.CharField(max_length=5, blank=True, null=True)
     
     # --- Tizim holati va Rollar ---
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='patient')

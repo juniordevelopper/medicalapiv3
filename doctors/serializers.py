@@ -20,9 +20,10 @@ class DirectorDoctorSerializer(serializers.ModelSerializer):
         }
 
 class DoctorProfileSerializer(serializers.ModelSerializer):
-    # Foydalanuvchi ma'lumotlari (ism, tel va h.k.)
     full_name = serializers.CharField(source='user.full_name', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
+    # avatar-ni source orqali o'qish va yozish uchun alohida e'lon qilamiz
+    avatar = serializers.ImageField(source='user.avatar', required=False)
     department_name = serializers.CharField(source='department.name', read_only=True)
     hospital_name = serializers.CharField(source='hospital.name', read_only=True)
 
@@ -30,6 +31,19 @@ class DoctorProfileSerializer(serializers.ModelSerializer):
         model = Doctor
         fields = [
             'id', 'full_name', 'email', 'hospital_name', 
-            'department_name', 'experience_years', 'bio'
+            'department_name', 'experience_years', 'bio', 'avatar'
         ]
         read_only_fields = ['id', 'hospital_name', 'department_name']
+
+    def update(self, instance, validated_data):
+        # Nested 'user' ma'lumotlarini ajratib olamiz
+        user_data = validated_data.pop('user', {})
+        avatar = user_data.get('avatar')
+
+        # Agar avatar yuborilgan bo'lsa, foydalanuvchi modeliga saqlaymiz
+        if avatar:
+            instance.user.avatar = avatar
+            instance.user.save()
+
+        # Qolgan Doctor modeliga tegishli maydonlarni yangilaymiz (bio, experience_years)
+        return super().update(instance, validated_data)

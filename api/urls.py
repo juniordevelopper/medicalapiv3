@@ -10,6 +10,7 @@ from doctors.views import *
 from receptions.views import *
 from bemors.views import *
 from navbats.views import *
+from chats.views import *
 
 router = DefaultRouter()
 # admin-routes
@@ -21,6 +22,7 @@ router.register(r'director/manage-doctors', DirectorDoctorManagementViewSet, bas
 router.register(r'doctor/queues', DoctorQueueViewSet, basename='doctor-queues')
 router.register(r'reception/bookings', ReceptionBookingViewSet, basename='reception-bookings')
 router.register(r'patient/my-bookings', PatientBookingViewSet, basename='patient-bookings')
+router.register(r'doctor/conversations', DoctorChatViewSet, basename='doctor-conversations')
 
 # director-routes
 

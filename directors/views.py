@@ -104,7 +104,23 @@ class DirectorReceptionManagementViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        # Reception o'chirilganda User o'chmaydi, roli 'patient'ga qaytadi
-        # Bu mantiq Reception modelining delete() metodida yozilgan
-        instance.delete()
-        return Response({"msg": "Xodim ishdan bo'shatildi va roli 'patient'ga qaytarildi."}, status=status.HTTP_24_NO_CONTENT)
+        user = instance.user
+
+        try:
+            with transaction.atomic():
+                # 1. Reception obyektini o'chirish
+                instance.delete()
+                
+                # 2. User rolini qayta 'patient' (oddiy user) holatiga qaytarish
+                user.role = 'patient'
+                user.save()
+
+            return Response(
+                {"msg": f"{user.full_name} ishdan bo'shatildi va roli 'patient'ga qaytarildi."}, 
+                status=status.HTTP_200_OK # 204 o'rniga 200 ishlatilsa, xabar frontga yetib boradi
+            )
+        except Exception as e:
+            return Response(
+                {"error": "Xodimni bo'shatishda xatolik yuz berdi."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
