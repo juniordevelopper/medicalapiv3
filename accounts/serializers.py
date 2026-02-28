@@ -10,7 +10,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'full_name', 'password')
+        fields = '__all__'
+        # fields = ('username', 'email', 'full_name', 'password')
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
@@ -32,3 +33,12 @@ class SetNewPasswordSerializer(serializers.Serializer):
         except Exception:
             raise serializers.ValidationError('Xatolik yuz berdi.')
         return attrs
+
+class UserMeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'email', 'full_name', 'phone_number', 
+            'role', 'avatar', 'birth_date', 'gender', 'address'
+        ]
+        read_only_fields = ['id', 'role', 'username', 'email']

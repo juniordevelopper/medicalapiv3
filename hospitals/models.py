@@ -25,6 +25,7 @@ class Hospital(models.Model):
     region = models.ForeignKey('locations.Region', on_delete=models.PROTECT, related_name='hospitals')
     departments = models.ManyToManyField('hospitals.Department', related_name='hospitals')
     address = models.TextField()
+    image = models.ImageField(upload_to='hospitals/photos/', null=True, blank=True)
     
     director = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -65,9 +66,3 @@ class Hospital(models.Model):
 
     def __str__(self):
         return self.name
-
-class HospitalImage(models.Model):
-    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='hospitals/photos/')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)

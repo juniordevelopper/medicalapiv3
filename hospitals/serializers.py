@@ -9,32 +9,38 @@ class DepartmentSerializer(serializers.ModelSerializer):
         model = Department
         fields = '__all__'
 
-class HospitalImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = HospitalImage
-        fields = ['id', 'image']
-
 class HospitalSerializer(serializers.ModelSerializer):
-    images = HospitalImageSerializer(many=True, read_only=True)
-    # Frontend uchun faqat 'patient' rolidagi (ya'ni hali xodim bo'lmagan) userlarni chiqarish
     director_candidates = serializers.SerializerMethodField()
+    region_details = serializers.SerializerMethodField()
+    department_details = serializers.SerializerMethodField()
+    director_name = serializers.CharField(source='director.full_name', read_only=True)
 
     class Meta:
         model = Hospital
         fields = [
-            'id', 'name', 'region', 'departments', 
-            'address', 'director', 'images', 'director_candidates',
-            'created_at', 'updated_at'
+            'id', 'name', 'region', 'departments', 'region_details',
+            'address', 'director', 'image', 'director_candidates', 
+            'director_name', 'department_details', 'created_at', 'updated_at'
         ]
 
     def get_director_candidates(self, obj):
         from accounts.models import User
-        # Faqat roli 'patient' bo'lgan va hali hech qanday shifoxonaga biriktirilmagan userlar
-        return User.objects.filter(
-            role='patient', 
-            is_active=True
-        ).values('id', 'full_name', 'email', 'username')
+        return User.objects.filter(role='patient', is_active=True).values('id', 'full_name', 'email', 'username')
 
-    def create(self, validated_data):
-        # Ko'p rasm yuklash mantiqi (agar kerak bo'lsa)
-        return super().create(validated_data)
+    def get_region_details(self, obj):
+        return {"id": obj.region.id, "name": obj.region.name} if obj.region else None
+
+    def get_department_details(self, obj):
+        return [{"id": d.id, "name": d.name} for d in obj.departments.all()]
+
+    def update(self, instance, validated_data):
+        # Direktor mantiqi (agar bo'sh kelsa None qilish)
+        if 'director' in validated_data and validated_data['director'] == "":
+            validated_data['director'] = None
+        
+        # Bo'limlarni yangilash
+        depts = validated_data.pop('departments', None)
+        if depts is not None:
+            instance.departments.set(depts)
+
+        return super().update(instance, validated_data)

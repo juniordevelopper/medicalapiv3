@@ -75,5 +75,8 @@ urlpatterns = [
     # Admin uchun (ID orqali boshqarish)
     path('admin/handle-delete/<int:pk>/', AdminHandleDeleteRequestView.as_view(), name='a-handle-delete'),
 
+    # login qilgan user ma'lumotlarini olish
+    path('auth/me/', UserMeView.as_view(), name='user-me'),
+    
     path('', include(router.urls)),
 ]

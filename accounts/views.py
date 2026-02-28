@@ -1,10 +1,11 @@
-from rest_framework import generics, status, views
+from rest_framework import generics, status, views, permissions
 from rest_framework.response import Response
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
-from .serializers import RegisterSerializer, PasswordResetRequestSerializer, SetNewPasswordSerializer
+from .serializers import *
+from admins.serializers import *
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -102,9 +103,12 @@ class PasswordResetRequestView(generics.GenericAPIView):
             current_site = request.get_host() 
             link = f"http://{current_site.split(':')[0]}:5173/auth/password-confirm/{uidb64}/{token}/"
             
-            subject = "Parolni tiklash so'rovi"
+            subject = "Medical Online - Parolni tiklash so'rovi"
             html_content = f"""
                 <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 500px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h1 style="color: #2563eb; margin: 0;">Medical Online</h1>
+                    </div>
                     <h2 style="color: #2563eb;">Salom, {user.full_name}!</h2>
                     <p>Biz sizning hisobingizdan parolni tiklash bo'yicha so'rov oldik.</p>
                     <p>Agar bu siz bo'lsangiz, parolni o'zgartirish uchun quyidagi tugmani bosing:</p>
@@ -117,7 +121,13 @@ class PasswordResetRequestView(generics.GenericAPIView):
                 </div>
             """
             
-            msg = EmailMultiAlternatives(subject, strip_tags(html_content), "admin@medicalonline.uz", [user.email])
+            text_content = strip_tags(html_content)
+            msg = EmailMultiAlternatives(
+                subject, 
+                text_content, 
+                "Medical Online <noreply@medicalonline.uz>", 
+                [user.email]
+            )
             msg.attach_alternative(html_content, "text/html")
             msg.send()
 
@@ -153,3 +163,15 @@ class PasswordResetConfirmView(views.APIView):
 
         except Exception as e:
             return Response({"error": "Xatolik yuz berdi"}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserMeView(generics.RetrieveAPIView):
+    """
+    Token orqali joriy foydalanuvchini aniqlaydi 
+    va uning ma'lumotlarini qaytaradi.
+    """
+    serializer_class = UserMeSerializer
+    permission_classes = [permissions.IsAuthenticated] # Faqat login qilganlar uchun
+
+    def get_object(self):
+        # request.user - bu tokendan aniqlangan joriy foydalanuvchi
+        return self.request.user

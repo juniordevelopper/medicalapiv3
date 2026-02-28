@@ -3,6 +3,7 @@ from rest_framework import generics, permissions
 from .serializers import *
 from accounts.serializers import *
 from .permissions import *
+from directors.permissions import *
 from notifications.models import *
 from notifications.serializers import *
 
@@ -17,7 +18,7 @@ class AdminProfileView(generics.RetrieveUpdateAPIView):
 
 class CandidateUserListView(generics.ListAPIView):
     """Admin va Directorlar xodim tanlashi uchun bo'sh userlar ro'yxati"""
-    permission_classes = [IsAdminRole]
+    permission_classes = [IsAdminRole | IsDirectorRole]
     serializer_class = RegisterSerializer
 
     def get_queryset(self):

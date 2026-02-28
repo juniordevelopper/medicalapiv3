@@ -10,7 +10,7 @@ class DirectorDoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Doctor
-        fields = ['id', 'user', 'user_details', 'department', 'department_name', 'experience_years', 'bio']
+        fields = ['id', 'user', 'user_details', 'department', 'department_name', 'experience_years', 'bio', 'room_number']
 
     def get_user_details(self, obj):
         return {
